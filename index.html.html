@@ -1,16 +1,31 @@
-<!DOCTYPE html>
+# Create the "original-style" landing with requested changes:
+# - Keep the sleek dark design with tiers, chips, progress bar, donors
+# - Methods: Flow, Mercado Pago, PayPal, Transferencia (remove Stripe, Crypto)
+# - Goal: 30,000 CLP
+# - Contact: @basti54
+# - Links provided by user
+# - Bank transfer modal with provided details
+#
+# Then package as a ZIP for easy deploy.
+
+from zipfile import ZipFile
+
+html = """<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Apoya la Transmisión – UFC en Telegram</title>
-  <meta name="description" content="Apoya la transmisión de UFC en Telegram con una donación. Métodos: Webpay/Flow, PayPal, Stripe, Mercado Pago, transferencia y cripto.">
+  <meta name="description" content="Apoya la transmisión de UFC en Telegram con una donación. Métodos: Webpay/Flow, Mercado Pago, PayPal y transferencia.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
   <style>
-    :root{ --bg:#0b0f14;--card:#121823;--muted:#708198;--primary:#e11d48;--primary-600:#be163b;--ring:#fda4af;--ok:#22c55e;--warn:#f59e0b;--white:#fff }
-    *{box-sizing:border-box} html,body{height:100%}
+    :root{
+      --bg:#0b0f14;--card:#121823;--muted:#708198;--primary:#e11d48;--primary-600:#be163b;--white:#fff
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
     body{margin:0;background:radial-gradient(1200px 800px at 80% -20%,#162031 0%,#0b0f14 70%), radial-gradient(1000px 600px at -10% 120%,#121823 0%,#0b0f14 60%); color:var(--white);font-family:"Plus Jakarta Sans",system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif}
     .container{max-width:980px;margin:0 auto;padding:20px}
     .hero{display:grid;gap:16px;grid-template-columns:1.2fr .8fr;align-items:center}
@@ -46,6 +61,8 @@
     .pill{background:#0f1420;border:1px dashed rgba(255,255,255,.2);padding:10px;border-radius:12px}
     .logo{display:flex;align-items:center;gap:10px}
     .logo svg{width:36px;height:36px}
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
+    .modal .card{max-width:560px;width:100%}
     @media (max-width:860px){.hero{grid-template-columns:1fr}.two{grid-template-columns:1fr}}
   </style>
 </head>
@@ -82,25 +99,23 @@
               <span class="chip" data-method="flow">Webpay / Flow</span>
               <span class="chip" data-method="mp">Mercado Pago</span>
               <span class="chip" data-method="paypal">PayPal</span>
-              <span class="chip" data-method="stripe">Stripe</span>
               <span class="chip" data-method="bank">Transferencia</span>
-              <span class="chip" data-method="crypto">Cripto</span>
             </div>
           </div>
           <button class="btn" id="donateBtn">Donar ahora</button>
-          <div class="aside">Sugerencia de seguridad: es mejor NO publicar números de cuenta bancarios aquí. Usa enlaces de pago de <b>Flow/Webpay, Mercado Pago, PayPal o Stripe</b>. Abajo dejas los placeholders para reemplazar por tus enlaces.</div>
+          <div class="aside">Sugerencia de seguridad: evita exponer números de cuenta. Usa alias/correo o datos mínimos.</div>
         </div>
       </div>
     </header>
 
-    <section class="grid two" style="margin-top:18px">
-      <div class="card">
-        <div class="card-inner grid" style="gap:12px">
+    <section class="card" style="margin-top:18px">
+      <div class="card-inner grid two" style="gap:12px">
+        <div>
           <div class="logo">
             <svg viewBox="0 0 24 24" fill="none"><path d="M3 6h18M3 12h18M3 18h18" stroke="#e11d48" stroke-width="2" stroke-linecap="round"/></svg>
             <strong>Meta del evento</strong>
           </div>
-          <div class="mini">Objetivo: $150.000 CLP para cubrir hosting, bots y automatizaciones.</div>
+          <div class="mini">Objetivo: $30.000 CLP para cubrir hosting, bots y automatizaciones.</div>
           <div class="progress"><div id="bar" class="bar"></div></div>
           <div class="mini"><span id="raised">$0</span> recaudados · <span id="backers">0</span> aportes</div>
           <div class="row">
@@ -108,9 +123,7 @@
             <button class="btn secondary" id="resetStats">Reiniciar</button>
           </div>
         </div>
-      </div>
-      <div class="card">
-        <div class="card-inner">
+        <div>
           <div class="logo" style="margin-bottom:10px">
             <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#e11d48" stroke-width="2"/><path d="M8 13l2.5 2.5L16 10" stroke="#e11d48" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             <strong>Últimos aportes</strong>
@@ -120,47 +133,44 @@
       </div>
     </section>
 
-    <section class="card" style="margin-top:18px">
-      <div class="card-inner grid" style="gap:10px">
-        <strong>Cómo se usa</strong>
-        <div class="grid two">
-          <div class="pill">
-            <div class="mini"><b>1)</b> Reemplaza los <i>placeholders</i> por tus enlaces</div>
-            <ul class="mini">
-              <li><code>FLOW_LINK_BASE</code> → tu link de botón de pago de Flow/Webpay</li>
-              <li><code>MERCADOPAGO_LINK_BASE</code> → link de pago de Mercado Pago</li>
-              <li><code>PAYPAL_ME</code> → tu <i>paypal.me/usuario</i></li>
-              <li><code>STRIPE_CHECKOUT_URL</code> → URL de Checkout (monto variable)</li>
-              <li>Transferencia: edita el modal con datos mínimos (banco, alias, correo) ⚠️</li>
-            </ul>
-          </div>
-          <div class="pill">
-            <div class="mini"><b>2)</b> Sube este archivo a tu hosting</div>
-            <ul class="mini">
-              <li>Funciona 100% estático (Hostinger, GitHub Pages, Netlify, Vercel, etc.)</li>
-              <li>Las métricas se guardan en <b>localStorage</b> (puedes conectarlo luego a un backend o a Formspree/Google Forms).</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <div class="footer">
       <span>© <span id="year"></span> Canal UFC en Telegram · Hecho con ❤️</span>
-      <span>Contacto: <a href="#" style="color:#fff;text-decoration:underline" id="contactLink">@ZonaUFC</a></span>
+      <span>Contacto: <a href="#" style="color:#fff;text-decoration:underline" id="contactLink">@basti54</a></span>
+    </div>
+  </div>
+
+  <!-- Modal Transferencia bonito -->
+  <div id="bankModal" class="modal">
+    <div class="card">
+      <div class="card-inner grid" style="gap:12px">
+        <div class="logo">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M3 11l9-7 9 7v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-8z" stroke="#e11d48" stroke-width="2"/></svg>
+          <strong>Transferencia bancaria</strong>
+        </div>
+        <div class="grid two">
+          <div class="pill mini">
+            <div><b>Titular:</b> Bastián Andrés Reyes Zúñiga</div>
+            <div><b>RUT:</b> 20.195.451-7</div>
+            <div><b>Banco:</b> Mercado Pago</div>
+            <div><b>Tipo de cuenta:</b> Cuenta Vista</div>
+            <div><b>N° de cuenta:</b> 1036065368</div>
+            <div><b>Alias/Correo:</b> reyesbastian54@gmail.com</div>
+          </div>
+          <div class="pill mini">
+            <div><b>Monto sugerido:</b> <span id="bankAmount"></span> CLP</div>
+            <div><b>Mensaje de pago:</b> <span id="bankMsg"></span></div>
+            <div class="mini" style="margin-top:6px">Pulsa copiar y pega estos datos en tu app bancaria.</div>
+            <div class="row"><button class="btn secondary" id="copyBank">Copiar datos</button></div>
+          </div>
+        </div>
+        <div class="row"><button class="btn" id="closeBank">Listo</button></div>
+      </div>
     </div>
   </div>
 
   <script>
-  function makePseudoQR(text){
-    const c=document.createElement('canvas');c.width=c.height=280;const x=c.getContext('2d');x.fillStyle="#fff";x.fillRect(0,0,280,280);x.fillStyle="#000";x.fillRect(0,0,280,40);x.fillStyle="#fff";x.font='bold 14px system-ui';x.fillText('Escanea este código',10,25);x.fillStyle="#000";x.strokeStyle="#000";x.strokeRect(20,60,240,200);x.font='12px system-ui';x.fillText('Coloca un QR real más tarde →',24,180);x.fillText(text.slice(0,28)+'…',24,200);return c.toDataURL('image/png');}
-  </script>
-
-  <script>
-    const state={amount:0, method:null};
-    const goal=150000;
-    const storeKey='donationStatsV1';
-
+    const goal=30000;
+    const storeKey='donationStats_final_v1';
     const donorsEl=document.getElementById('donors');
     const barEl=document.getElementById('bar');
     const raisedEl=document.getElementById('raised');
@@ -184,7 +194,6 @@
         l.classList.add('active');
         const v=Number(l.querySelector('input').value);
         document.getElementById('customAmount').value=v;
-        state.amount=v;
       });
     });
 
@@ -193,7 +202,6 @@
       ch.addEventListener('click',()=>{
         chips.forEach(c=>c.classList.remove('active'));
         ch.classList.add('active');
-        state.method=ch.dataset.method;
       });
     });
 
@@ -214,28 +222,21 @@
     document.getElementById('donateBtn').onclick=()=>{
       const amount=Number(document.getElementById('customAmount').value||0);
       const name=(document.getElementById('name').value||'Anónimo').trim();
+      const method=document.querySelector('.chip.active')?.dataset.method;
       if(!amount||amount<500)return alert('Ingresa un monto válido (mín. $500 CLP).');
-      if(!state.method)return alert('Elige un método de pago.');
+      if(!method)return alert('Elige un método de pago.');
 
       const FLOW_LINK_BASE = 'https://www.flow.cl/btn.php?token=a25b01e5a2f728bbbff88fe3ecbf3931aa5e7df4';
       const MERCADOPAGO_LINK_BASE = 'https://link.mercadopago.cl/donacionesufc';
       const PAYPAL_ME = 'https://paypal.me/basti54';
-      const STRIPE_CHECKOUT_URL = 'https://buy.stripe.com/test_XXXXXX?amount=';
-      const CRYPTO_ADDR = 'bc1q_tu_wallet_btc_o_usdt';
 
       let url='#';
-      switch(state.method){
+      switch(method){
         case 'flow': url = FLOW_LINK_BASE; break;
         case 'mp': url = MERCADOPAGO_LINK_BASE; break;
         case 'paypal': url = PAYPAL_ME; break;
-        case 'stripe': url = STRIPE_CHECKOUT_URL + amount; break;
-        case 'crypto':
-          const msg=`Dirección cripto:\n${CRYPTO_ADDR}\n\nCopia y paga con el monto: ${amount} CLP (equivalente en tu wallet).`;
-          alert(msg);
-          url = '#';
-          break;
         case 'bank':
-          openBankModal(amount);
+          openBankModal(amount, name);
           return;
       }
 
@@ -247,43 +248,34 @@
       }
     }
 
-    const modal=document.createElement('div');
-    modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;padding:16px;z-index:50';
-    modal.innerHTML=`<div id="bankCard" class="card" style="max-width:520px;width:100%"><div class="card-inner grid" style="gap:10px">
-      <strong>Transferencia bancaria (⚠️ comparte solo lo necesario)</strong>
-      <div class="grid two"><div class="pill mini">
-        <div><b>Banco:</b> ________</div>
-        <div><b>Tipo cuenta:</b> ________</div>
-        <div><b>Titular:</b> ________</div>
-        <div><b>Alias correo:</b> donaciones@tudominio.cl</div>
-      </div>
-      <div class="pill mini">
-        <div><b>Monto:</b> <span id="bankAmount"></span> CLP</div>
-        <div><b>Mensaje:</b> <span id="bankMsg"></span></div>
-        <div style="margin-top:8px" class="mini">Escanea para pagar desde tu app bancaria (reemplaza por un QR real):</div>
-        <img id="bankQR" alt="QR" style="width:100%;max-width:240px;border-radius:10px;border:1px solid rgba(255,255,255,.12)"/>
-      </div></div>
-      <div class="row"><button class="btn" id="copyBank">Copiar datos</button><button class="btn secondary" id="closeBank">Cerrar</button></div>
-    </div></div>`;
-    document.body.appendChild(modal);
-
-    function openBankModal(amount){
+    // Modal transferencia
+    const bankModal = document.getElementById('bankModal');
+    function openBankModal(amount, name){
       document.getElementById('bankAmount').textContent=amount.toLocaleString('es-CL');
-      const name=(document.getElementById('name').value||'Anónimo').trim();
       const msg=`UFC Telegram · ${name}`;
       document.getElementById('bankMsg').textContent=msg;
-      document.getElementById('bankQR').src=makePseudoQR('Transferencia '+amount+' CLP');
-      modal.style.display='flex';
+      bankModal.style.display='flex';
       document.getElementById('copyBank').onclick=()=>{
-        const txt=`Banco: ________\nTipo: ________\nTitular: ________\nAlias correo: donaciones@tudominio.cl\nMensaje: ${msg}\nMonto: ${amount} CLP`;
+        const txt=`Titular: Bastián Andrés Reyes Zúñiga\\nRUT: 20.195.451-7\\nBanco: Mercado Pago\\nTipo: Cuenta Vista\\nN° de cuenta: 1036065368\\nAlias/Correo: reyesbastian54@gmail.com\\nMensaje: ${msg}\\nMonto: ${amount} CLP`;
         navigator.clipboard.writeText(txt); alert('Datos copiados ✅');
         stats.raised += amount; stats.backers += 1; stats.list.unshift({name,amount});
         localStorage.setItem(storeKey,JSON.stringify(stats)); renderStats();
       };
-      document.getElementById('closeBank').onclick=()=>modal.style.display='none';
     }
+    document.getElementById('closeBank').onclick=()=>bankModal.style.display='none';
 
     document.getElementById('year').textContent=new Date().getFullYear();
   </script>
 </body>
 </html>
+"""
+
+html_path = "/mnt/data/index.html"
+with open(html_path, "w", encoding="utf-8") as f:
+    f.write(html)
+
+zip_path = "/mnt/data/donaciones-ufc-site-final.zip"
+with ZipFile(zip_path, "w") as z:
+    z.write(html_path, arcname="index.html")
+
+html_path, zip_path

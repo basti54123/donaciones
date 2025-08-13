@@ -1,16 +1,4 @@
-# Create the "original-style" landing with requested changes:
-# - Keep the sleek dark design with tiers, chips, progress bar, donors
-# - Methods: Flow, Mercado Pago, PayPal, Transferencia (remove Stripe, Crypto)
-# - Goal: 30,000 CLP
-# - Contact: @basti54
-# - Links provided by user
-# - Bank transfer modal with provided details
-#
-# Then package as a ZIP for easy deploy.
-
-from zipfile import ZipFile
-
-html = """<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="utf-8" />
@@ -256,7 +244,7 @@ html = """<!DOCTYPE html>
       document.getElementById('bankMsg').textContent=msg;
       bankModal.style.display='flex';
       document.getElementById('copyBank').onclick=()=>{
-        const txt=`Titular: Bastián Andrés Reyes Zúñiga\\nRUT: 20.195.451-7\\nBanco: Mercado Pago\\nTipo: Cuenta Vista\\nN° de cuenta: 1036065368\\nAlias/Correo: reyesbastian54@gmail.com\\nMensaje: ${msg}\\nMonto: ${amount} CLP`;
+        const txt=`Titular: Bastián Andrés Reyes Zúñiga\nRUT: 20.195.451-7\nBanco: Mercado Pago\nTipo: Cuenta Vista\nN° de cuenta: 1036065368\nAlias/Correo: reyesbastian54@gmail.com\nMensaje: ${msg}\nMonto: ${amount} CLP`;
         navigator.clipboard.writeText(txt); alert('Datos copiados ✅');
         stats.raised += amount; stats.backers += 1; stats.list.unshift({name,amount});
         localStorage.setItem(storeKey,JSON.stringify(stats)); renderStats();
@@ -268,14 +256,3 @@ html = """<!DOCTYPE html>
   </script>
 </body>
 </html>
-"""
-
-html_path = "/mnt/data/index.html"
-with open(html_path, "w", encoding="utf-8") as f:
-    f.write(html)
-
-zip_path = "/mnt/data/donaciones-ufc-site-final.zip"
-with ZipFile(zip_path, "w") as z:
-    z.write(html_path, arcname="index.html")
-
-html_path, zip_path

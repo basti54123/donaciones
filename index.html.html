@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Apoya la Transmisión – UFC en Telegram</title>
+  <meta name="description" content="Apoya la transmisión de UFC en Telegram con una donación. Métodos: Webpay/Flow, PayPal, Stripe, Mercado Pago, transferencia y cripto.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root{ --bg:#0b0f14;--card:#121823;--muted:#708198;--primary:#e11d48;--primary-600:#be163b;--ring:#fda4af;--ok:#22c55e;--warn:#f59e0b;--white:#fff }
+    *{box-sizing:border-box} html,body{height:100%}
+    body{margin:0;background:radial-gradient(1200px 800px at 80% -20%,#162031 0%,#0b0f14 70%), radial-gradient(1000px 600px at -10% 120%,#121823 0%,#0b0f14 60%); color:var(--white);font-family:"Plus Jakarta Sans",system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif}
+    .container{max-width:980px;margin:0 auto;padding:20px}
+    .hero{display:grid;gap:16px;grid-template-columns:1.2fr .8fr;align-items:center}
+    .badge{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:#ffd7dc;background:rgba(225,29,72,.12);border:1px solid rgba(225,29,72,.25);padding:8px 10px;border-radius:999px}
+    .title{font-size:clamp(28px,5vw,44px);line-height:1.05;margin:8px 0 6px}
+    .subtitle{color:var(--muted);margin:0 0 6px}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.08);box-shadow:0 8px 40px rgba(0,0,0,.35);backdrop-filter:blur(6px);border-radius:16px}
+    .card-inner{padding:18px}
+    .grid{display:grid;gap:16px}
+    .two{grid-template-columns:1fr 1fr}
+    .tiers{display:flex;gap:10px;flex-wrap:wrap}
+    .tier{flex:1 1 120px;background:#121823;border:1px solid rgba(255,255,255,.06);padding:12px;border-radius:14px;cursor:pointer;transition:.2s;user-select:none}
+    .tier:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.18)}
+    .tier input{display:none}
+    .tier.active{outline:2px solid var(--primary);background:linear-gradient(180deg,rgba(225,29,72,.18),rgba(255,255,255,.03))}
+    .amount{font-weight:800;font-size:18px}
+    .muted{color:var(--muted)}
+    .methods{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .chip{border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);padding:8px 10px;border-radius:12px;cursor:pointer;font-weight:600}
+    .chip.active{border-color:var(--primary);box-shadow:0 0 0 3px rgba(225,29,72,.25) inset}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--primary);border:none;color:var(--white);padding:12px 16px;border-radius:12px;font-weight:800;cursor:pointer;transition:.2s;width:100%}
+    .btn:hover{background:var(--primary-600)}
+    .btn.secondary{background:transparent;border:1px solid rgba(255,255,255,.2);font-weight:700}
+    .row{display:flex;gap:10px}
+    input[type="number"],input[type="text"]{width:100%;background:#0f1420;border:1px solid rgba(255,255,255,.12);color:var(--white);padding:12px;border-radius:12px}
+    .aside{font-size:13px;color:var(--muted)}
+    .progress{height:10px;background:#0f1420;border:1px solid rgba(255,255,255,.12);border-radius:999px;overflow:hidden}
+    .bar{height:100%;background:linear-gradient(90deg,var(--primary),#f43f5e,#fb7185);width:0%}
+    .mini{font-size:12px;color:var(--muted)}
+    .donors{display:grid;gap:8px}
+    .donor{display:flex;justify-content:space-between;background:#0f1420;border:1px solid rgba(255,255,255,.08);padding:10px;border-radius:10px}
+    .footer{margin-top:28px;font-size:12px;color:#8b9bb1;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+    .pill{background:#0f1420;border:1px dashed rgba(255,255,255,.2);padding:10px;border-radius:12px}
+    .logo{display:flex;align-items:center;gap:10px}
+    .logo svg{width:36px;height:36px}
+    @media (max-width:860px){.hero{grid-template-columns:1fr}.two{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="hero">
+      <div>
+        <span class="badge">🔴 En vivo · UFC por Telegram</span>
+        <h1 class="title">¿Te gusta la transmisión? <br>Apóyala con una donación 🙌</h1>
+        <p class="subtitle">Tu aporte mantiene los servidores, bots y herramientas funcionando para que no te pierdas ninguna pelea.</p>
+        <div class="row" style="gap:12px;margin-top:10px">
+          <button id="shareBtn" class="btn secondary" style="width:auto">Compartir</button>
+          <button id="copyBtn" class="btn secondary" style="width:auto">Copiar link</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-inner grid" style="gap:14px">
+          <div>
+            <div class="mini">Monto</div>
+            <div class="tiers" id="tiers">
+              <label class="tier"><input type="radio" name="preset" value="2000"><div class="amount">$2.000</div><div class="muted">Un cafecito ☕️</div></label>
+              <label class="tier"><input type="radio" name="preset" value="5000"><div class="amount">$5.000</div><div class="muted">Round 1 🥊</div></label>
+              <label class="tier"><input type="radio" name="preset" value="10000"><div class="amount">$10.000</div><div class="muted">Round 2 🔥</div></label>
+              <label class="tier"><input type="radio" name="preset" value="20000"><div class="amount">$20.000</div><div class="muted">Main Event 🏆</div></label>
+            </div>
+          </div>
+          <div class="row">
+            <input type="number" id="customAmount" min="500" step="500" placeholder="Otro monto (CLP)" />
+            <input type="text" id="name" placeholder="Nombre (opcional)" />
+          </div>
+          <div>
+            <div class="mini">Método de pago</div>
+            <div class="methods" id="methods">
+              <span class="chip" data-method="flow">Webpay / Flow</span>
+              <span class="chip" data-method="mp">Mercado Pago</span>
+              <span class="chip" data-method="paypal">PayPal</span>
+              <span class="chip" data-method="stripe">Stripe</span>
+              <span class="chip" data-method="bank">Transferencia</span>
+              <span class="chip" data-method="crypto">Cripto</span>
+            </div>
+          </div>
+          <button class="btn" id="donateBtn">Donar ahora</button>
+          <div class="aside">Sugerencia de seguridad: es mejor NO publicar números de cuenta bancarios aquí. Usa enlaces de pago de <b>Flow/Webpay, Mercado Pago, PayPal o Stripe</b>. Abajo dejas los placeholders para reemplazar por tus enlaces.</div>
+        </div>
+      </div>
+    </header>
+
+    <section class="grid two" style="margin-top:18px">
+      <div class="card">
+        <div class="card-inner grid" style="gap:12px">
+          <div class="logo">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M3 6h18M3 12h18M3 18h18" stroke="#e11d48" stroke-width="2" stroke-linecap="round"/></svg>
+            <strong>Meta del evento</strong>
+          </div>
+          <div class="mini">Objetivo: $150.000 CLP para cubrir hosting, bots y automatizaciones.</div>
+          <div class="progress"><div id="bar" class="bar"></div></div>
+          <div class="mini"><span id="raised">$0</span> recaudados · <span id="backers">0</span> aportes</div>
+          <div class="row">
+            <button class="btn secondary" id="addAnon">Sumar aporte de prueba</button>
+            <button class="btn secondary" id="resetStats">Reiniciar</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-inner">
+          <div class="logo" style="margin-bottom:10px">
+            <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#e11d48" stroke-width="2"/><path d="M8 13l2.5 2.5L16 10" stroke="#e11d48" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <strong>Últimos aportes</strong>
+          </div>
+          <div class="donors" id="donors"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:18px">
+      <div class="card-inner grid" style="gap:10px">
+        <strong>Cómo se usa</strong>
+        <div class="grid two">
+          <div class="pill">
+            <div class="mini"><b>1)</b> Reemplaza los <i>placeholders</i> por tus enlaces</div>
+            <ul class="mini">
+              <li><code>FLOW_LINK_BASE</code> → tu link de botón de pago de Flow/Webpay</li>
+              <li><code>MERCADOPAGO_LINK_BASE</code> → link de pago de Mercado Pago</li>
+              <li><code>PAYPAL_ME</code> → tu <i>paypal.me/usuario</i></li>
+              <li><code>STRIPE_CHECKOUT_URL</code> → URL de Checkout (monto variable)</li>
+              <li>Transferencia: edita el modal con datos mínimos (banco, alias, correo) ⚠️</li>
+            </ul>
+          </div>
+          <div class="pill">
+            <div class="mini"><b>2)</b> Sube este archivo a tu hosting</div>
+            <ul class="mini">
+              <li>Funciona 100% estático (Hostinger, GitHub Pages, Netlify, Vercel, etc.)</li>
+              <li>Las métricas se guardan en <b>localStorage</b> (puedes conectarlo luego a un backend o a Formspree/Google Forms).</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer">
+      <span>© <span id="year"></span> Canal UFC en Telegram · Hecho con ❤️</span>
+      <span>Contacto: <a href="#" style="color:#fff;text-decoration:underline" id="contactLink">@ZonaUFC</a></span>
+    </div>
+  </div>
+
+  <script>
+  function makePseudoQR(text){
+    const c=document.createElement('canvas');c.width=c.height=280;const x=c.getContext('2d');x.fillStyle="#fff";x.fillRect(0,0,280,280);x.fillStyle="#000";x.fillRect(0,0,280,40);x.fillStyle="#fff";x.font='bold 14px system-ui';x.fillText('Escanea este código',10,25);x.fillStyle="#000";x.strokeStyle="#000";x.strokeRect(20,60,240,200);x.font='12px system-ui';x.fillText('Coloca un QR real más tarde →',24,180);x.fillText(text.slice(0,28)+'…',24,200);return c.toDataURL('image/png');}
+  </script>
+
+  <script>
+    const state={amount:0, method:null};
+    const goal=150000;
+    const storeKey='donationStatsV1';
+
+    const donorsEl=document.getElementById('donors');
+    const barEl=document.getElementById('bar');
+    const raisedEl=document.getElementById('raised');
+    const backersEl=document.getElementById('backers');
+
+    const stats=JSON.parse(localStorage.getItem(storeKey)||'{"raised":0,"backers":0,"list":[]}');
+    function fmt(n){return n.toLocaleString('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0});}
+    function renderStats(){
+      raisedEl.textContent=fmt(stats.raised);
+      backersEl.textContent=stats.backers;
+      const pct=Math.min(100, Math.round((stats.raised/goal)*100));
+      barEl.style.width=pct+'%';
+      donorsEl.innerHTML=stats.list.slice(0,6).map(d=>`<div class="donor"><span>${d.name}</span><span>${fmt(d.amount)}</span></div>`).join('') || '<div class="mini">Aún no hay aportes. ¡Sé el primero! ✨</div>';
+    }
+    renderStats();
+
+    const tiers=document.querySelectorAll('.tier');
+    tiers.forEach(l=>{
+      l.addEventListener('click',()=>{
+        tiers.forEach(t=>t.classList.remove('active'));
+        l.classList.add('active');
+        const v=Number(l.querySelector('input').value);
+        document.getElementById('customAmount').value=v;
+        state.amount=v;
+      });
+    });
+
+    const chips=document.querySelectorAll('.chip');
+    chips.forEach(ch=>{
+      ch.addEventListener('click',()=>{
+        chips.forEach(c=>c.classList.remove('active'));
+        ch.classList.add('active');
+        state.method=ch.dataset.method;
+      });
+    });
+
+    document.getElementById('shareBtn').onclick=async()=>{
+      const url=location.href;
+      try{ await navigator.share({title:document.title,text:'Apoya la transmisión de UFC en Telegram',url}); }
+      catch{ navigator.clipboard.writeText(url); alert('Enlace copiado ✅'); }
+    };
+    document.getElementById('copyBtn').onclick=()=>{navigator.clipboard.writeText(location.href); alert('Enlace copiado ✅')};
+
+    document.getElementById('addAnon').onclick=()=>{
+      const amount= Math.floor(Math.random()*3+1)*5000;
+      stats.raised+=amount;stats.backers+=1;stats.list.unshift({name:'Anónimo',amount});
+      localStorage.setItem(storeKey,JSON.stringify(stats));renderStats();
+    }
+    document.getElementById('resetStats').onclick=()=>{localStorage.removeItem(storeKey);location.reload()}
+
+    document.getElementById('donateBtn').onclick=()=>{
+      const amount=Number(document.getElementById('customAmount').value||0);
+      const name=(document.getElementById('name').value||'Anónimo').trim();
+      if(!amount||amount<500)return alert('Ingresa un monto válido (mín. $500 CLP).');
+      if(!state.method)return alert('Elige un método de pago.');
+
+      const FLOW_LINK_BASE = 'https://www.flow.cl/btn.php?token=TU_TOKEN_FLOW';
+      const MERCADOPAGO_LINK_BASE = 'https://mpago.la/tu-enlace';
+      const PAYPAL_ME = 'https://paypal.me/TuUsuario';
+      const STRIPE_CHECKOUT_URL = 'https://buy.stripe.com/test_XXXXXX?amount=';
+      const CRYPTO_ADDR = 'bc1q_tu_wallet_btc_o_usdt';
+
+      let url='#';
+      switch(state.method){
+        case 'flow': url = FLOW_LINK_BASE; break;
+        case 'mp': url = MERCADOPAGO_LINK_BASE; break;
+        case 'paypal': url = PAYPAL_ME; break;
+        case 'stripe': url = STRIPE_CHECKOUT_URL + amount; break;
+        case 'crypto':
+          const msg=`Dirección cripto:\n${CRYPTO_ADDR}\n\nCopia y paga con el monto: ${amount} CLP (equivalente en tu wallet).`;
+          alert(msg);
+          url = '#';
+          break;
+        case 'bank':
+          openBankModal(amount);
+          return;
+      }
+
+      if(url && url !== '#'){
+        stats.raised += amount; stats.backers += 1; stats.list.unshift({name,amount});
+        localStorage.setItem(storeKey,JSON.stringify(stats));
+        renderStats();
+        window.location.href = url;
+      }
+    }
+
+    const modal=document.createElement('div');
+    modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;padding:16px;z-index:50';
+    modal.innerHTML=`<div id="bankCard" class="card" style="max-width:520px;width:100%"><div class="card-inner grid" style="gap:10px">
+      <strong>Transferencia bancaria (⚠️ comparte solo lo necesario)</strong>
+      <div class="grid two"><div class="pill mini">
+        <div><b>Banco:</b> ________</div>
+        <div><b>Tipo cuenta:</b> ________</div>
+        <div><b>Titular:</b> ________</div>
+        <div><b>Alias correo:</b> donaciones@tudominio.cl</div>
+      </div>
+      <div class="pill mini">
+        <div><b>Monto:</b> <span id="bankAmount"></span> CLP</div>
+        <div><b>Mensaje:</b> <span id="bankMsg"></span></div>
+        <div style="margin-top:8px" class="mini">Escanea para pagar desde tu app bancaria (reemplaza por un QR real):</div>
+        <img id="bankQR" alt="QR" style="width:100%;max-width:240px;border-radius:10px;border:1px solid rgba(255,255,255,.12)"/>
+      </div></div>
+      <div class="row"><button class="btn" id="copyBank">Copiar datos</button><button class="btn secondary" id="closeBank">Cerrar</button></div>
+    </div></div>`;
+    document.body.appendChild(modal);
+
+    function openBankModal(amount){
+      document.getElementById('bankAmount').textContent=amount.toLocaleString('es-CL');
+      const name=(document.getElementById('name').value||'Anónimo').trim();
+      const msg=`UFC Telegram · ${name}`;
+      document.getElementById('bankMsg').textContent=msg;
+      document.getElementById('bankQR').src=makePseudoQR('Transferencia '+amount+' CLP');
+      modal.style.display='flex';
+      document.getElementById('copyBank').onclick=()=>{
+        const txt=`Banco: ________\nTipo: ________\nTitular: ________\nAlias correo: donaciones@tudominio.cl\nMensaje: ${msg}\nMonto: ${amount} CLP`;
+        navigator.clipboard.writeText(txt); alert('Datos copiados ✅');
+        stats.raised += amount; stats.backers += 1; stats.list.unshift({name,amount});
+        localStorage.setItem(storeKey,JSON.stringify(stats)); renderStats();
+      };
+      document.getElementById('closeBank').onclick=()=>modal.style.display='none';
+    }
+
+    document.getElementById('year').textContent=new Date().getFullYear();
+  </script>
+</body>
+</html>
